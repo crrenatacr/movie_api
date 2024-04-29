@@ -1,0 +1,19 @@
+{
+  "name": "movie_api",
+  "version": "1.0.0",
+  "description": "This app provides acess to info about different movies, directors and genres. Users can sing up, update personal info and list favorite movies. ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/crrenatacr/movie_api.git"
+  },
+  "author": "Renata Hoffmann",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/crrenatacr/movie_api/issues"
+  },
+  "homepage": "https://github.com/crrenatacr/movie_api#readme"
+}
