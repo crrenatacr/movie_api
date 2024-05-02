@@ -1,4 +1,5 @@
 const express = require('express');
+const morgan = require('morgan');
 const app = express();
 const path = require('path');
 
@@ -15,6 +16,9 @@ const moviesData = [
     { title: 'The Sound of Music', viewership: 'Cultural impact' },
     { title: 'Frozen', viewership: 'Box office success (animated)' }
 ];
+
+// Use Morgan middleware to log all requests
+app.use(morgan('dev'));
 
 // Serve the documentation.html file from the public folder
 app.use(express.static(path.join(__dirname, 'public')));
