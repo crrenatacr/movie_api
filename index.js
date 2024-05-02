@@ -35,6 +35,12 @@ app.get('/movies', (req, res) => {
     res.json(moviesData);
 });
 
+// Error-handling middleware function to log application-level errors
+app.use((err, req, res, next) => {
+    console.error('Error:', err.stack);
+    res.status(500).send('Internal Server Error');
+});
+
 // Start the server
 const port = 3000;
 app.listen(port, () => {
