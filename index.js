@@ -35,6 +35,11 @@ app.get('/movies', (req, res) => {
     res.json(moviesData);
 });
 
+// GET route for serving the documentation.html file
+app.get('/documentation', (req, res) => {
+    res.sendFile('documentation.html', { root: path.join(__dirname, 'public') });
+});
+
 // Error-handling middleware function to log application-level errors
 app.use((err, req, res, next) => {
     console.error('Error:', err.stack);
