@@ -3,18 +3,23 @@ const morgan = require('morgan');
 const app = express();
 const path = require('path');
 
-// Sample dataset of the ten most watched movies of all times
-const moviesData = [
-    { title: 'Avatar', viewership: 'Highest grossing film of all time' },
-    { title: 'Titanic', viewership: 'Second highest grossing film of all time' },
-    { title: 'Star Wars: Episode VII - The Force Awakens', viewership: 'Box office success' },
-    { title: 'Avengers: Endgame', viewership: 'Highest grossing film of all time' },
-    { title: 'Avengers: Infinity War', viewership: 'Box office success' },
-    { title: 'The Lion King', viewership: 'Box office success (animated)' },
-    { title: 'Jurassic Park', viewership: 'Box office success' },
-    { title: 'The Avengers', viewership: 'Box office success' },
-    { title: 'The Sound of Music', viewership: 'Cultural impact' },
-    { title: 'Frozen', viewership: 'Box office success (animated)' }
+// "In-memory" array of movie objects
+let movies = [
+    {
+        title: "Avatar",
+        description: "A paraplegic marine dispatched to the moon Pandora on a unique mission becomes torn between following his orders and protecting the world he feels is his home.",
+        genre: "Action, Adventure, Fantasy",
+        director: "James Cameron",
+        imageURL: "https://www.example.com/avatar.jpg"
+    },
+    {
+        title: "Titanic",
+        description: "A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.",
+        genre: "Drama, Romance",
+        director: "James Cameron",
+        imageURL: "https://www.example.com/titanic.jpg"
+    },
+    // Add more movie objects as needed
 ];
 
 // Use Morgan middleware to log all requests
@@ -30,13 +35,18 @@ app.get('/', (req, res) => {
 
 // GET route for /movies
 app.get('/movies', (req, res) => {
-    res.json(moviesData);
+    res.json(movies);
 });
 
 // GET route for /movies/:title
 app.get('/movies/:title', (req, res) => {
     const title = req.params.title;
-    res.send(`You requested data about the movie with title: ${title}`);
+    const movie = movies.find(movie => movie.title === title);
+    if (movie) {
+        res.json(movie);
+    } else {
+        res.status(404).send('Movie not found');
+    }
 });
 
 // GET route for /genres/:name
@@ -92,3 +102,20 @@ const port = 3000;
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
+
+// "In-memory" array of movie objects
+function getAllMovies() {
+    return movies;
+}
+
+// Return data about a single movie by title
+function getMovieByTitle(title) {
+    return movies.find(movie => movie.title === title);
+}
+
+// Example usage of the methods:
+console.log("List of all movies:");
+console.log(getAllMovies());
+
+console.log("\nData of the movie 'Avatar':");
+console.log(getMovieByTitle("Avatar"));
