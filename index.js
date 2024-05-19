@@ -8,9 +8,6 @@ const morgan = require("morgan");
 const app = express();
 const path = require("path");
 
-// "In-memory" array of movie objects
-// This will be replaced with database queries
-
 // Middleware
 app.use(express.json()); // Parse JSON request bodies
 app.use(morgan("dev")); // Logging middleware
@@ -18,9 +15,7 @@ app.use(express.static(path.join(__dirname, "public"))); // Serve static files
 
 // GET route for /
 app.get("/", (req, res) => {
-  res.send(
-    "Welcome to our movie API! Visit /movies to get data about the top 10 most watched movies."
-  );
+  res.send("Welcome to our movie API !");
 });
 
 // GET route for /movies
@@ -80,17 +75,21 @@ app.post("/users/:userId/favorites", (req, res) => {
   const userId = req.params.userId;
   const movieId = req.body.movieId;
 
-  // Check if the user exists in the users array
-  const user = users.find((user) => user.id === userId);
-  if (!user) {
-    return res.status(404).send("User not found");
-  }
-
-  // Add the movieId to the user's favorites array
-  user.favorites.push(movieId);
-
-  // Send a response confirming the addition of the movie to favorites
-  res.send(`Movie added to favorites for user with ID ${userId}`);
+  Users.findById(userId)
+    .then(user => {
+      if (!user) {
+        return res.status(404).send("User not found");
+      }
+      user.favorites.push(movieId);
+      return user.save();
+    })
+    .then(user => {
+      res.send(`Movie added to favorites for user with ID ${userId}`);
+    })
+    .catch(err => {
+      console.error(err);
+      res.status(500).send("Internal Server Error");
+    });
 });
 
 // DELETE route for user deregistration
