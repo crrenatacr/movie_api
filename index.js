@@ -109,39 +109,55 @@ app.get("/", (req, res) => {
 });
 
 // GET route for /movies
-app.get("/movies", (req, res) => {
-  res.json(movies);
+app.get("/movies", (req, res, next) => {
+  Movies.find()
+    .then(movies => {
+      res.json(movies);
+    })
+    .catch(next);
 });
 
 // GET route for /movies/:title
-app.get("/movies/:title", (req, res) => {
+app.get("/movies/:title", (req, res, next) => {
   const title = req.params.title;
-  const movie = movies.find((movie) => movie.title === title);
-  if (movie) {
-    res.json(movie);
-  } else {
-    res.status(404).send("Movie not found");
-  }
+  Movies.findOne({ title: title })
+    .then(movie => {
+      if (!movie) {
+        return res.status(404).send("Movie not found");
+      }
+      res.json(movie);
+    })
+    .catch(next);
 });
 
 // POST route for user registration
-app.post("/users/register", (req, res) => {
+app.post("/users/register", (req, res, next) => {
   const newUser = req.body;
 
-  if (newUser.name) {
-    newUser.id = generateUserId();
-    newUser.favorites = [];
-    users.push(newUser);
-    res.status(201).json(newUser);
-  } else {
-    res.status(400).send("Users need a name");
+  if (!newUser.name) {
+    return res.status(400).send("Users need a name");
   }
+
+  Users.create(newUser)
+    .then(user => {
+      res.status(201).json(user);
+    })
+    .catch(next);
 });
 
 // PUT route for updating user info
-app.put("/users/:userId", (req, res) => {
+app.put("/users/:userId", (req, res, next) => {
   const userId = req.params.userId;
-  res.send(`User with ID ${userId} updated successfully`);
+  const updatedUserData = req.body;
+
+  Users.findByIdAndUpdate(userId, updatedUserData, { new: true })
+    .then(user => {
+      if (!user) {
+        return res.status(404).send("User not found");
+      }
+      res.json(user);
+    })
+    .catch(next);
 });
 
 // POST route for adding a movie to favorites
@@ -157,36 +173,51 @@ app.post("/users/:userId/favorites", (req, res) => {
   }
 });
 
-// DELETE route for removing a movie from favorites
-app.delete("/users/:userId/favorites/:movieId", (req, res) => {
+// DELETE route for user deregistration
+app.delete("/users/:userId", (req, res, next) => {
   const userId = req.params.userId;
-  const movieId = req.params.movieId;
-  const userIndex = users.findIndex((user) => user.id === userId);
-  if (userIndex !== -1) {
-    const favoritesIndex = users[userIndex].favorites.findIndex(
-      (favorite) => favorite === movieId
-    );
-    if (favoritesIndex !== -1) {
-      users[userIndex].favorites.splice(favoritesIndex, 1);
-      res.send(`Movie removed from favorites for user with ID ${userId}`);
-    } else {
-      res.status(404).send("Movie not found in favorites");
-    }
-  } else {
-    res.status(404).send("User not found");
-  }
+
+  Users.findByIdAndDelete(userId)
+    .then(user => {
+      if (!user) {
+        return res.status(404).send("User not found");
+      }
+      res.send(`User with ID ${userId} deregistered successfully`);
+    })
+    .catch(next);
 });
 
 // DELETE route for user deregistration
-app.delete("/users/:userId", (req, res) => {
+app.delete("/users/:userId", (req, res, next) => {
   const userId = req.params.userId;
-  const userIndex = users.findIndex((user) => user.id === userId);
-  if (userIndex !== -1) {
-    users.splice(userIndex, 1);
-    res.send(`User with ID ${userId} deregistered successfully`);
-  } else {
-    res.status(404).send("User not found");
-  }
+
+  Users.findByIdAndDelete(userId)
+    .then(user => {
+      if (!user) {
+        return res.status(404).send("User not found");
+      }
+      res.send(`User with ID ${userId} deregistered successfully`);
+    })
+    .catch(next);
+});
+
+// DELETE route for removing a movie from favorites
+app.delete("/users/:userId/favorites/:movieId", (req, res, next) => {
+  const userId = req.params.userId;
+  const movieId = req.params.movieId;
+
+  Users.findByIdAndUpdate(
+    userId,
+    { $pull: { favorites: movieId } },
+    { new: true }
+  )
+    .then(user => {
+      if (!user) {
+        return res.status(404).send("User not found");
+      }
+      res.send(`Movie removed from favorites for user with ID ${userId}`);
+    })
+    .catch(next);
 });
 
 // Error-handling middleware function to log application-level errors
