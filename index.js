@@ -76,16 +76,21 @@ app.put("/users/:userId", (req, res, next) => {
 });
 
 // POST route for adding a movie to favorites
-app.post("/users/:userId/favorites", express.json(), (req, res) => {
+app.post("/users/:userId/favorites", (req, res) => {
   const userId = req.params.userId;
   const movieId = req.body.movieId;
-  const userIndex = users.findIndex((user) => user.id === userId);
-  if (userIndex !== -1) {
-    users[userIndex].favorites.push(movieId);
-    res.send(`Movie added to favorites for user with ID ${userId}`);
-  } else {
-    res.status(404).send("User not found");
+
+  // Check if the user exists in the users array
+  const user = users.find((user) => user.id === userId);
+  if (!user) {
+    return res.status(404).send("User not found");
   }
+
+  // Add the movieId to the user's favorites array
+  user.favorites.push(movieId);
+
+  // Send a response confirming the addition of the movie to favorites
+  res.send(`Movie added to favorites for user with ID ${userId}`);
 });
 
 // DELETE route for user deregistration
