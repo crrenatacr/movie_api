@@ -42,17 +42,17 @@ app.get("/movies/:title", (req, res, next) => {
 
 // POST route for user registration
 app.post("/users/register", (req, res, next) => {
-    const newUser = req.body;
+  const newUser = req.body;
 
-    if (!newUser.Username) {
-        return res.status(400).send("Users need a username");
-    }
+  if (!newUser.Username) {
+    return res.status(400).send("Users need a username");
+  }
 
-    Users.create(newUser)
-        .then(user => {
-            res.status(201).json(user);
-        })
-        .catch(next);
+  Users.create(newUser)
+    .then(user => {
+      res.status(201).json(user);
+    })
+    .catch(next);
 });
 
 // GET route for listing all users
