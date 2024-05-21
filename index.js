@@ -117,21 +117,21 @@ app.delete("/users/:userId", (req, res, next) => {
 
 // DELETE route for removing a movie from favorites
 app.delete("/users/:userId/favorites/:movieId", (req, res, next) => {
-    const userId = req.params.userId;
-    const movieId = req.params.movieId;
+  const userId = req.params.userId;
+  const movieId = req.params.movieId;
 
-    Users.findByIdAndUpdate(
-        userId,
-        { $pull: { FavoriteMovies: movieId } },
-        { new: true }
-    )
-        .then(user => {
-            if (!user) {
-                return res.status(404).send("User not found");
-            }
-            res.send(`Movie removed from favorites for user with ID ${userId}`);
-        })
-        .catch(next);
+  Users.findByIdAndUpdate(
+    userId,
+    { $pull: { FavoriteMovies: movieId } }, // Corrected line
+    { new: true }
+  )
+    .then(user => {
+      if (!user) {
+        return res.status(404).send("User not found");
+      }
+      res.send(`Movie removed from favorites for user with ID ${userId}`);
+    })
+    .catch(next);
 });
 
 // Error-handling middleware function to log application-level errors
