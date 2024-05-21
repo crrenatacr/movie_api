@@ -81,24 +81,24 @@ app.put("/users/:userId", (req, res, next) => {
 
 // POST route for adding a movie to favorites
 app.post("/users/:userId/favorites", (req, res) => {
-    const userId = req.params.userId;
-    const movieId = req.body.movieId;
+  const userId = req.params.userId;
+  const movieId = req.body.movieId;
 
-    Users.findById(userId)
-        .then(user => {
-            if (!user) {
-                return res.status(404).send("User not found");
-            }
-            user.FavoriteMovies.push(movieId);
-            return user.save();
-        })
-        .then(user => {
-            res.send(`Movie added to favorites for user with ID ${userId}`);
-        })
-        .catch(err => {
-            console.error(err);
-            res.status(500).send("Internal Server Error");
-        });
+  Users.findById(userId)
+    .then(user => {
+      if (!user) {
+        return res.status(404).send("User not found");
+      }
+      user.FavoriteMovies.push(movieId); // Corrected line
+      return user.save();
+    })
+    .then(user => {
+      res.send(`Movie added to favorites for user with ID ${userId}`);
+    })
+    .catch(err => {
+      console.error(err);
+      res.status(500).send("Internal Server Error");
+    });
 });
 
 // DELETE route for user deregistration
