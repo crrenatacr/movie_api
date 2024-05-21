@@ -57,11 +57,11 @@ app.post("/users/register", (req, res, next) => {
 
 // GET route for listing all users
 app.get("/users", (req, res, next) => {
-    Users.find()
-        .then(users => {
-            res.json(users);
-        })
-        .catch(next);
+  Users.find()
+      .then(users => {
+          res.json(users);
+      })
+      .catch(next);
 });
 
 // PUT route for updating user info
