@@ -3,19 +3,25 @@ const Models = require('./models.js');
 const Movies = Models.Movie;
 const Users = Models.User;
 mongoose.connect('mongodb://localhost:27017/moviesapi', { useNewUrlParser: true, useUnifiedTopology: true });
+
 const express = require("express");
 const morgan = require("morgan");
+const bodyParser = require('body-parser'); // Adicionado para importar body-parser
 const app = express();
 const path = require("path");
 
 // Middleware
 app.use(express.json()); // Parse JSON request bodies
+app.use(bodyParser.urlencoded({ extended: true })); // Adicionado para parsear URL-encoded request bodies
 app.use(morgan("dev")); // Logging middleware
 app.use(express.static(path.join(__dirname, "public"))); // Serve static files
 
+// Autenticação
+let auth = require('./auth')(app); // Adicionado para importar e inicializar auth
+
 // GET route for /
 app.get("/", (req, res) => {
-    res.send("Welcome to our movie API !");
+    res.send("Welcome to our movie API!");
 });
 
 // GET route for /movies
@@ -89,7 +95,7 @@ app.post("/users/:userId/favorites", (req, res) => {
       if (!user) {
         return res.status(404).send("User not found");
       }
-      user.FavoriteMovies.push(movieId); // Corrected line
+      user.FavoriteMovies.push(movieId);
       return user.save();
     })
     .then(user => {
@@ -122,7 +128,7 @@ app.delete("/users/:userId/favorites/:movieId", (req, res, next) => {
 
   Users.findByIdAndUpdate(
     userId,
-    { $pull: { FavoriteMovies: movieId } }, // Corrected line
+    { $pull: { FavoriteMovies: movieId } },
     { new: true }
   )
     .then(user => {
