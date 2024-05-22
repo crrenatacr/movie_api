@@ -6,18 +6,18 @@ mongoose.connect('mongodb://localhost:27017/moviesapi', { useNewUrlParser: true,
 
 const express = require("express");
 const morgan = require("morgan");
-const bodyParser = require('body-parser'); // Adicionado para importar body-parser
+const bodyParser = require('body-parser'); // Added to import body-parser
 const app = express();
 const path = require("path");
 
 // Middleware
 app.use(express.json()); // Parse JSON request bodies
-app.use(bodyParser.urlencoded({ extended: true })); // Adicionado para parsear URL-encoded request bodies
+app.use(bodyParser.urlencoded({ extended: true })); // Added to parse URL-encoded request bodies
 app.use(morgan("dev")); // Logging middleware
 app.use(express.static(path.join(__dirname, "public"))); // Serve static files
 
-// Autenticação
-let auth = require('./auth')(app); // Adicionado para importar e inicializar auth
+// Authentication
+let auth = require('./auth')(app); // Added to import and initialize auth
 
 // Import and initialize Passport for authentication
 const passport = require('passport'); // Authentication middleware
@@ -32,7 +32,7 @@ app.get("/", (req, res) => {
 app.get("/movies", passport.authenticate('jwt', { session: false }), async (req, res) => {
   await Movies.find()
     .then((movies) => {
-      res.status(201).json(movies);
+      res.status(200).json(movies);
     })
     .catch((error) => {
       console.error(error);
