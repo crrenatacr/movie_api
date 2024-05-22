@@ -78,11 +78,16 @@ app.get("/users", passport.authenticate('jwt', { session: false }), async (req, 
 });
 
 // PUT route for updating user info
-app.put("/users/:userId", passport.authenticate('jwt', { session: false }), async (req, res, next) => {
-    const userId = req.params.userId;
+app.put("/users/:Username", passport.authenticate('jwt', { session: false }), async (req, res, next) => {
+    const username = req.params.Username;
     const updatedUserData = req.body;
 
-    await Users.findByIdAndUpdate(userId, updatedUserData, { new: true })
+    // Condition to check if the user is updating their own profile
+    if (req.user.Username !== username) {
+        return res.status(403).send("Permission denied");
+    }
+
+    await Users.findOneAndUpdate({ Username: username }, updatedUserData, { new: true })
         .then(user => {
             if (!user) {
                 return res.status(404).send("User not found");
@@ -134,29 +139,3 @@ app.delete("/users/:userId/favorites/:movieId", passport.authenticate('jwt', { s
   const movieId = req.params.movieId;
 
   await Users.findByIdAndUpdate(
-    userId,
-    { $pull: { FavoriteMovies: movieId } },
-    { new: true }
-  )
-    .then(user => {
-      if (!user) {
-        return res.status(404).send("User not found");
-      }
-      res.send(`Movie removed from favorites for user with ID ${userId}`);
-    })
-    .catch(next);
-});
-
-// Error-handling middleware function to log application-level errors
-app.use((err, req, res, next) => {
-    console.error("Error:", err.stack);
-    res.status(500).send("Internal Server Error");
-});
-
-// Start the server
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-});
-
-module.exports = app; // Export the app for testing
