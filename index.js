@@ -138,4 +138,29 @@ app.delete("/users/:userId/favorites/:movieId", passport.authenticate('jwt', { s
   const userId = req.params.userId;
   const movieId = req.params.movieId;
 
-  await Users.findByIdAndUpdate(
+  await Users.findByIdAndUpdate(userId,
+    { $pull: { FavoriteMovies: movieId } },
+    { new: true }
+  )
+    .then(user => {
+      if (!user) {
+        return res.status(404).send("User not found");
+      }
+      res.send(`Movie removed from favorites for user with ID ${userId}`);
+    })
+    .catch(next);
+});
+
+// Error-handling middleware function to log application-level errors
+app.use((err, req, res, next) => {
+    console.error("Error:", err.stack);
+    res.status(500).send("Internal Server Error");
+});
+
+// Start the server
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+});
+
+module.exports = app; // Export the app for testing
