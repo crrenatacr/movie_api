@@ -25,7 +25,7 @@ app.use(express.static(path.join(__dirname, "public")));
 let auth = require("./auth")(app);
 
 const cors = require("cors");
-let allowedOrigins = ["http://localhost:8080", "http://imdb.com"];
+let allowedOrigins = ["http://localhost:8080", "http://testsite.com"];
 
 app.use(
   cors({
