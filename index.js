@@ -25,7 +25,7 @@ app.use(express.static(path.join(__dirname, "public")));
 let auth = require("./auth")(app);
 
 const cors = require("cors");
-let allowedOrigins = ["http://localhost:8080", "http://testsite.com"];
+let allowedOrigins = ["http://localhost:8080", "http://imdb.com"];
 
 app.use(
   cors({
@@ -87,21 +87,27 @@ app.get(
 app.post(
   "/users/register",
   [
-    check('Username', 'Username is required').not().isEmpty(),
-    check('Username', 'Username contains non-alphanumeric characters - not allowed.').isAlphanumeric(),
-    check('Password', 'Password is required').not().isEmpty(),
-    check('Email', 'Email is required').isEmail()
+    check("Username", "Username is required").isLength({ min: 5 }),
+    check(
+      "Username",
+      "Username contains non alphanumeric characters - not allowed."
+    ).isAlphanumeric(),
+    check("Password", "Password is required").not().isEmpty(),
+    check("Email", "Email does not appear to be valid").isEmail()
   ],
   async (req, res) => {
-    const errors = validationResult(req);
+    // check the validation object for errors
+    let errors = validationResult(req);
+
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.array() });
     }
 
     let hashedPassword = Users.hashPassword(req.body.Password);
-    await Users.findOne({ Username: req.body.Username })
+    await Users.findOne({ Username: req.body.Username }) // Checks if a user with the requested username already exists
       .then((user) => {
         if (user) {
+          //If the user is found, send a response that it already exists
           return res.status(400).send(req.body.Username + " already exists");
         } else {
           Users.create({
@@ -144,9 +150,12 @@ app.put(
   "/users/:Username",
   [
     passport.authenticate("jwt", { session: false }),
-    check('Username', 'Username is required').not().isEmpty(),
-    check('Username', 'Username contains non-alphanumeric characters - not allowed.').isAlphanumeric(),
-    check('Email', 'Email is required').isEmail()
+    check("Username", "Username is required").not().isEmpty(),
+    check(
+      "Username",
+      "Username contains non-alphanumeric characters - not allowed."
+    ).isAlphanumeric(),
+    check("Email", "Email is required").isEmail()
   ],
   async (req, res, next) => {
     const errors = validationResult(req);
