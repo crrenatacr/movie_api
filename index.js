@@ -87,16 +87,13 @@ app.get(
 app.post(
   "/users/register",
   [
-    check("Username", "Username is required").isLength({ min: 5 }),
-    check(
-      "Username",
-      "Username contains non alphanumeric characters - not allowed."
-    ).isAlphanumeric(),
-    check("Password", "Password is required").not().isEmpty(),
-    check("Email", "Email does not appear to be valid").isEmail()
-  ],
-  async (req, res) => {
-    // check the validation object for errors
+    check('Username', 'Username is required').isLength({min: 5}),
+    check('Username', 'Username contains non alphanumeric characters - not allowed.').isAlphanumeric(),
+    check('Password', 'Password is required').not().isEmpty(),
+    check('Email', 'Email does not appear to be valid').isEmail()
+  ], async (req, res) => {
+
+  // check the validation object for errors
     let errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -108,29 +105,27 @@ app.post(
       .then((user) => {
         if (user) {
           //If the user is found, send a response that it already exists
-          return res.status(400).send(req.body.Username + " already exists");
+          return res.status(400).send(req.body.Username + ' already exists');
         } else {
-          Users.create({
-            Username: req.body.Username,
-            Password: hashedPassword,
-            Email: req.body.Email,
-            Birthday: req.body.Birthday
-          })
-            .then((user) => {
-              res.status(201).json(user);
+          Users
+            .create({
+              Username: req.body.Username,
+              Password: hashedPassword,
+              Email: req.body.Email,
+              Birthday: req.body.Birthday
             })
+            .then((user) => { res.status(201).json(user) })
             .catch((error) => {
               console.error(error);
-              res.status(500).send("Error: " + error);
+              res.status(500).send('Error: ' + error);
             });
         }
       })
       .catch((error) => {
         console.error(error);
-        res.status(500).send("Error: " + error);
+        res.status(500).send('Error: ' + error);
       });
-  }
-);
+  });
 
 // GET route for listing all users
 app.get(
@@ -150,12 +145,9 @@ app.put(
   "/users/:Username",
   [
     passport.authenticate("jwt", { session: false }),
-    check("Username", "Username is required").not().isEmpty(),
-    check(
-      "Username",
-      "Username contains non-alphanumeric characters - not allowed."
-    ).isAlphanumeric(),
-    check("Email", "Email is required").isEmail()
+    check('Username', 'Username is required').not().isEmpty(),
+    check('Username', 'Username contains non-alphanumeric characters - not allowed.').isAlphanumeric(),
+    check('Email', 'Email is required').isEmail()
   ],
   async (req, res, next) => {
     const errors = validationResult(req);
@@ -261,9 +253,9 @@ app.use((err, req, res, next) => {
 });
 
 // Start the server
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+const port = process.env.PORT || 8080;
+app.listen(port, '0.0.0.0', () => {
+  console.log('Listening on Port ' + port);
 });
 
 module.exports = app; // Export the app for testing

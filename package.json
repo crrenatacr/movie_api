@@ -1,10 +1,11 @@
 {
   "name": "movie_api",
   "version": "1.0.0",
-  "description": "This app provides acess to info about different movies, directors and genres. Users can sing up, update personal info and list favorite movies. ",
+  "description": "This app provides access to info about different movies, directors and genres. Users can sign up, update personal info and list favorite movies.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
