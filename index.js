@@ -1,8 +1,9 @@
-const { check, validationResult } = require('express-validator');
+const { check, validationResult } = require("express-validator");
 const mongoose = require("mongoose");
 const Models = require("./models.js");
 const Movies = Models.Movie;
 const Users = Models.User;
+
 mongoose.connect("mongodb://localhost:27017/moviesapi", {
   useNewUrlParser: true,
   useUnifiedTopology: true
@@ -82,34 +83,48 @@ app.get(
   }
 );
 
-// POST route for user registration
-app.post("/users/register", async (req, res) => {
-  let hashedPassword = Users.hashPassword(req.body.Password);
-  await Users.findOne({ Username: req.body.Username })
-    .then((user) => {
-      if (user) {
-        return res.status(400).send(req.body.Username + ' already exists');
-      } else {
-        Users.create({
-          Username: req.body.Username,
-          Password: hashedPassword,
-          Email: req.body.Email,
-          Birthday: req.body.Birthday
-        })
-        .then((user) => {
-          res.status(201).json(user);
-        })
-        .catch((error) => {
-          console.error(error);
-          res.status(500).send('Error: ' + error);
-        });
-      }
-    })
-    .catch((error) => {
-      console.error(error);
-      res.status(500).send('Error: ' + error);
-    });
-});
+// POST route for user registration with validation
+app.post(
+  "/users/register",
+  [
+    check('Username', 'Username is required').not().isEmpty(),
+    check('Username', 'Username contains non-alphanumeric characters - not allowed.').isAlphanumeric(),
+    check('Password', 'Password is required').not().isEmpty(),
+    check('Email', 'Email is required').isEmail()
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+
+    let hashedPassword = Users.hashPassword(req.body.Password);
+    await Users.findOne({ Username: req.body.Username })
+      .then((user) => {
+        if (user) {
+          return res.status(400).send(req.body.Username + " already exists");
+        } else {
+          Users.create({
+            Username: req.body.Username,
+            Password: hashedPassword,
+            Email: req.body.Email,
+            Birthday: req.body.Birthday
+          })
+            .then((user) => {
+              res.status(201).json(user);
+            })
+            .catch((error) => {
+              console.error(error);
+              res.status(500).send("Error: " + error);
+            });
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        res.status(500).send("Error: " + error);
+      });
+  }
+);
 
 // GET route for listing all users
 app.get(
@@ -124,16 +139,30 @@ app.get(
   }
 );
 
-// PUT route for updating user info
+// PUT route for updating user info with validation
 app.put(
   "/users/:Username",
-  passport.authenticate("jwt", { session: false }),
+  [
+    passport.authenticate("jwt", { session: false }),
+    check('Username', 'Username is required').not().isEmpty(),
+    check('Username', 'Username contains non-alphanumeric characters - not allowed.').isAlphanumeric(),
+    check('Email', 'Email is required').isEmail()
+  ],
   async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+
     const username = req.params.Username;
     const updatedUserData = req.body;
 
     if (req.user.Username !== username) {
       return res.status(403).send("Permission denied");
+    }
+
+    if (updatedUserData.Password) {
+      updatedUserData.Password = Users.hashPassword(updatedUserData.Password);
     }
 
     await Users.findOneAndUpdate({ Username: username }, updatedUserData, {
