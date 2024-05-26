@@ -18,6 +18,7 @@
   "homepage": "https://github.com/crrenatacr/movie_api#readme",
   "dependencies": {
     "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^7.0.4",
