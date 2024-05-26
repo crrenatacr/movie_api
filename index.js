@@ -9,29 +9,27 @@ mongoose.connect("mongodb://localhost:27017/moviesapi", {
 
 const express = require("express");
 const morgan = require("morgan");
-const bodyParser = require("body-parser"); // Added to import body-parser
+const bodyParser = require("body-parser");
 const app = express();
 const path = require("path");
 
 // Middleware
-app.use(express.json()); // Parse JSON request bodies
-app.use(bodyParser.urlencoded({ extended: true })); // Added to parse URL-encoded request bodies
-app.use(morgan("dev")); // Logging middleware
-app.use(express.static(path.join(__dirname, "public"))); // Serve static files
+app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(morgan("dev"));
+app.use(express.static(path.join(__dirname, "public")));
 
 // Authentication
-let auth = require("./auth")(app); // Added to import and initialize auth
+let auth = require("./auth")(app);
 
 const cors = require("cors");
 let allowedOrigins = ["http://localhost:8080", "http://testsite.com"];
 
-// Using CORS within the application
 app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
       if (allowedOrigins.indexOf(origin) === -1) {
-        // If a specific origin isn’t found on the list of allowed origins
         let message =
           "The CORS policy for this application doesn’t allow access from origin " +
           origin;
@@ -42,9 +40,8 @@ app.use(
   })
 );
 
-// Import and initialize Passport for authentication
-const passport = require("passport"); // Authentication middleware
-require("./passport"); // Configuration of authentication strategies
+const passport = require("passport");
+require("./passport");
 
 // GET route for /
 app.get("/", (req, res) => {
@@ -85,18 +82,32 @@ app.get(
 );
 
 // POST route for user registration
-app.post("/users/register", (req, res, next) => {
-  const newUser = req.body;
-
-  if (!newUser.Username) {
-    return res.status(400).send("Users need a username");
-  }
-
-  Users.create(newUser)
+app.post("/users/register", async (req, res) => {
+  let hashedPassword = Users.hashPassword(req.body.Password);
+  await Users.findOne({ Username: req.body.Username })
     .then((user) => {
-      res.status(201).json(user);
+      if (user) {
+        return res.status(400).send(req.body.Username + ' already exists');
+      } else {
+        Users.create({
+          Username: req.body.Username,
+          Password: hashedPassword,
+          Email: req.body.Email,
+          Birthday: req.body.Birthday
+        })
+        .then((user) => {
+          res.status(201).json(user);
+        })
+        .catch((error) => {
+          console.error(error);
+          res.status(500).send('Error: ' + error);
+        });
+      }
     })
-    .catch(next);
+    .catch((error) => {
+      console.error(error);
+      res.status(500).send('Error: ' + error);
+    });
 });
 
 // GET route for listing all users
@@ -120,7 +131,6 @@ app.put(
     const username = req.params.Username;
     const updatedUserData = req.body;
 
-    // Condition to check if the user is updating their own profile
     if (req.user.Username !== username) {
       return res.status(403).send("Permission denied");
     }
