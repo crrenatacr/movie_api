@@ -88,7 +88,7 @@ app.post(
   "/users/register",
   [
     check('Username', 'Username is required').isLength({min: 5}),
-    check('Username', 'Username contains non alphanumeric characters - not allowed.').isAlphanumeric(),
+    check('Username', 'Username contains non alphanumeric characters - not allowed.').matches(/^[a-zA-Z0-9 ]*$/),
     check('Password', 'Password is required').not().isEmpty(),
     check('Email', 'Email does not appear to be valid').isEmail()
   ], async (req, res) => {
@@ -126,20 +126,7 @@ app.post(
         res.status(500).send('Error: ' + error);
       });
   });
-
-// GET route for listing all users
-app.get(
-  "/users",
-  passport.authenticate("jwt", { session: false }),
-  async (req, res, next) => {
-    await Users.find()
-      .then((users) => {
-        res.json(users);
-      })
-      .catch(next);
-  }
-);
-
+  
 // PUT route for updating user info with validation
 app.put(
   "/users/:Username",
