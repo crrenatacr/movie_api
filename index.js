@@ -10,11 +10,8 @@ const Users = Models.User;
 //   useUnifiedTopology: true
 // });
 
-// Connection to the MongoDB Atlas database
-mongoose.connect("mongodb+srv://crrenatacr:minheuzinho@movieverse.wrwqtzo.mongodb.net/movieVerse?retryWrites=true&w=majority", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-});
+// Connection to the MongoDB Atlas database with enviroment variable
+mongoose.connect( process.env.CONNECTION_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 
 const express = require("express");
 const morgan = require("morgan");
