@@ -4,7 +4,14 @@ const Models = require("./models.js");
 const Movies = Models.Movie;
 const Users = Models.User;
 
-mongoose.connect("mongodb://localhost:27017/moviesapi", {
+// Connection to the local database (commented out for later use, if needed)
+// mongoose.connect("mongodb://localhost:27017/moviesapi", {
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true
+// });
+
+// Connection to the MongoDB Atlas database
+mongoose.connect("mongodb+srv://crrenatacr:minheuzinho@movieverse.wrwqtzo.mongodb.net/movieVerse?retryWrites=true&w=majority", {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
@@ -126,7 +133,7 @@ app.post(
         res.status(500).send('Error: ' + error);
       });
   });
-  
+
 // PUT route for updating user info with validation
 app.put(
   "/users/:Username",
