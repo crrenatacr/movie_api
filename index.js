@@ -4,14 +4,13 @@ const Models = require("./models.js");
 const Movies = Models.Movie;
 const Users = Models.User;
 
-// Connection to the local database (commented out for later use, if needed)
-// mongoose.connect("mongodb://localhost:27017/moviesapi", {
-//   useNewUrlParser: true,
-//   useUnifiedTopology: true
-// });
+// Load environment variables from .env file
+require('dotenv').config();
 
-// Connection to the MongoDB Atlas database with enviroment variable
-mongoose.connect( process.env.CONNECTION_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+// Connect to MongoDB Atlas database with environment variable
+mongoose.connect(process.env.CONNECTION_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('Database connected successfully'))
+  .catch(err => console.error('Database connection error:', err));
 
 const express = require("express");
 const morgan = require("morgan");
@@ -26,17 +25,18 @@ app.use(morgan("dev"));
 app.use(express.static(path.join(__dirname, "public")));
 
 // Authentication
-let auth = require("./auth")(app);
+const passport = require("passport");
+require("./passport");
 
 const cors = require("cors");
-let allowedOrigins = ["http://localhost:8080", "http://testsite.com"];
+const allowedOrigins = ["http://localhost:8080", "http://testsite.com"];
 
 app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
       if (allowedOrigins.indexOf(origin) === -1) {
-        let message =
+        const message =
           "The CORS policy for this application doesn’t allow access from origin " +
           origin;
         return callback(new Error(message), false);
@@ -45,9 +45,6 @@ app.use(
     }
   })
 );
-
-const passport = require("passport");
-require("./passport");
 
 // GET route for /
 app.get("/", (req, res) => {
@@ -97,39 +94,39 @@ app.post(
     check('Email', 'Email does not appear to be valid').isEmail()
   ], async (req, res) => {
 
-  // check the validation object for errors
-    let errors = validationResult(req);
+  // Check the validation object for errors
+  const errors = validationResult(req);
 
-    if (!errors.isEmpty()) {
-      return res.status(422).json({ errors: errors.array() });
-    }
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() });
+  }
 
-    let hashedPassword = Users.hashPassword(req.body.Password);
-    await Users.findOne({ Username: req.body.Username }) // Checks if a user with the requested username already exists
-      .then((user) => {
-        if (user) {
-          //If the user is found, send a response that it already exists
-          return res.status(400).send(req.body.Username + ' already exists');
-        } else {
-          Users
-            .create({
-              Username: req.body.Username,
-              Password: hashedPassword,
-              Email: req.body.Email,
-              Birthday: req.body.Birthday
-            })
-            .then((user) => { res.status(201).json(user) })
-            .catch((error) => {
-              console.error(error);
-              res.status(500).send('Error: ' + error);
-            });
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-        res.status(500).send('Error: ' + error);
-      });
-  });
+  const hashedPassword = Users.hashPassword(req.body.Password);
+  await Users.findOne({ Username: req.body.Username }) // Checks if a user with the requested username already exists
+    .then((user) => {
+      if (user) {
+        // If the user is found, send a response that it already exists
+        return res.status(400).send(req.body.Username + ' already exists');
+      } else {
+        Users
+          .create({
+            Username: req.body.Username,
+            Password: hashedPassword,
+            Email: req.body.Email,
+            Birthday: req.body.Birthday
+          })
+          .then((user) => { res.status(201).json(user) })
+          .catch((error) => {
+            console.error(error);
+            res.status(500).send('Error: ' + error);
+          });
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).send('Error: ' + error);
+    });
+});
 
 // PUT route for updating user info with validation
 app.put(
@@ -232,6 +229,23 @@ app.delete(
           return res.status(404).send("User not found");
         }
         res.send(`Movie removed from favorites for user with ID ${userId}`);
+      })
+      .catch(next);
+  }
+);
+
+// GET route for retrieving user by username
+app.get(
+  "/users/:Username",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res, next) => {
+    const username = req.params.Username;
+    await Users.findOne({ Username: username })
+      .then((user) => {
+        if (!user) {
+          return res.status(404).send("User not found");
+        }
+        res.json(user);
       })
       .catch(next);
   }
