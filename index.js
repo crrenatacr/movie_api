@@ -50,7 +50,7 @@ app.use(
 // Function to generate JWT token
 const generateJWTToken = (user) => {
   return jwt.sign(user, process.env.JWT_SECRET, {
-    subject: user.Username, // This is the username you're encoding in the JWT
+    subject: user.Username, // Username encoding in the JWT
     expiresIn: "7d", // This specifies that the token will expire in 7 days
     algorithm: "HS256" // This is the algorithm used to "sign" or encode the values of the JWT
   });
@@ -113,13 +113,13 @@ app.get(
   }
 );
 
-// GET route for /movies/directors/:director
 app.get(
   "/movies/directors/:director",
   passport.authenticate("jwt", { session: false }),
   async (req, res, next) => {
     const director = req.params.director;
-    await Movies.find({ "Director.Name": director })
+    const regex = new RegExp(director, "i"); // 'i' para insensível a maiúsculas e minúsculas
+    await Movies.find({ "Director.Name": regex })
       .then((movies) => {
         if (!movies || movies.length === 0) {
           return res.status(404).send("Movies not found");
