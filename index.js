@@ -5,16 +5,12 @@ const Movies = Models.Movie;
 const Users = Models.User;
 
 // Load environment variables from .env file
-require("dotenv").config();
+require('dotenv').config();
 
 // Connect to MongoDB Atlas database with environment variable
-mongoose
-  .connect(process.env.CONNECTION_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => console.log("Database connected successfully"))
-  .catch((err) => console.error("Database connection error:", err));
+mongoose.connect(process.env.CONNECTION_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('Database connected successfully'))
+  .catch(err => console.error('Database connection error:', err));
 
 const express = require("express");
 const morgan = require("morgan");
@@ -47,7 +43,7 @@ app.use(
         return callback(new Error(message), false);
       }
       return callback(null, true);
-    },
+    }
   })
 );
 
@@ -56,7 +52,7 @@ const generateJWTToken = (user) => {
   return jwt.sign(user, process.env.JWT_SECRET, {
     subject: user.Username, // This is the username you're encoding in the JWT
     expiresIn: "7d", // This specifies that the token will expire in 7 days
-    algorithm: "HS256", // This is the algorithm used to "sign" or encode the values of the JWT
+    algorithm: "HS256" // This is the algorithm used to "sign" or encode the values of the JWT
   });
 };
 
@@ -66,7 +62,7 @@ app.post("/login", (req, res) => {
     if (error || !user) {
       return res.status(400).json({
         message: "Something is not right",
-        user: user,
+        user: user
       });
     }
     req.login(user, { session: false }, (error) => {
@@ -117,6 +113,7 @@ app.get(
   }
 );
 
+// GET route for /movies/directors/:director
 app.get(
   "/movies/directors/:director",
   passport.authenticate("jwt", { session: false }),
@@ -133,12 +130,13 @@ app.get(
   }
 );
 
+// GET route for /movies/genres/:genre
 app.get(
-  "/movies/directors/:director",
+  "/movies/genres/:genre",
   passport.authenticate("jwt", { session: false }),
   async (req, res, next) => {
-    const director = req.params.director;
-    await Movies.find({ "Director.Name": director })
+    const genre = req.params.genre;
+    await Movies.find({ "Genre.Name": genre })
       .then((movies) => {
         if (!movies || movies.length === 0) {
           return res.status(404).send("Movies not found");
@@ -166,15 +164,12 @@ app.get(
 app.post(
   "/users/register",
   [
-    check("Username", "Username is required").isLength({ min: 5 }),
-    check(
-      "Username",
-      "Username contains non alphanumeric characters - not allowed."
-    ).matches(/^[a-zA-Z0-9 ]*$/),
-    check("Password", "Password is required").not().isEmpty(),
-    check("Email", "Email does not appear to be valid").isEmail(),
-  ],
-  async (req, res) => {
+    check('Username', 'Username is required').isLength({ min: 5 }),
+    check('Username', 'Username contains non alphanumeric characters - not allowed.').matches(/^[a-zA-Z0-9 ]*$/),
+    check('Password', 'Password is required').not().isEmpty(),
+    check('Email', 'Email does not appear to be valid').isEmail()
+  ], async (req, res) => {
+
     // Check the validation object for errors
     const errors = validationResult(req);
 
@@ -187,41 +182,36 @@ app.post(
       .then((user) => {
         if (user) {
           // If the user is found, send a response that it already exists
-          return res.status(400).send(req.body.Username + " already exists");
+          return res.status(400).send(req.body.Username + ' already exists');
         } else {
-          Users.create({
-            Username: req.body.Username,
-            Password: hashedPassword,
-            Email: req.body.Email,
-            Birthday: req.body.Birthday,
-          })
-            .then((user) => {
-              res.status(201).json(user);
+          Users
+            .create({
+              Username: req.body.Username,
+              Password: hashedPassword,
+              Email: req.body.Email,
+              Birthday: req.body.Birthday
             })
+            .then((user) => { res.status(201).json(user) })
             .catch((error) => {
               console.error(error);
-              res.status(500).send("Error: " + error);
+              res.status(500).send('Error: ' + error);
             });
         }
       })
       .catch((error) => {
         console.error(error);
-        res.status(500).send("Error: " + error);
+        res.status(500).send('Error: ' + error);
       });
-  }
-);
+  });
 
 // PUT route for updating user info with validation
 app.put(
   "/users/:Username",
   [
     passport.authenticate("jwt", { session: false }),
-    check("Username", "Username is required").not().isEmpty(),
-    check(
-      "Username",
-      "Username contains non-alphanumeric characters - not allowed."
-    ).isAlphanumeric(),
-    check("Email", "Email is required").isEmail(),
+    check('Username', 'Username is required').not().isEmpty(),
+    check('Username', 'Username contains non-alphanumeric characters - not allowed.').isAlphanumeric(),
+    check('Email', 'Email is required').isEmail()
   ],
   async (req, res, next) => {
     const errors = validationResult(req);
@@ -241,7 +231,7 @@ app.put(
     }
 
     await Users.findOneAndUpdate({ Username: username }, updatedUserData, {
-      new: true,
+      new: true
     })
       .then((user) => {
         if (!user) {
@@ -345,8 +335,8 @@ app.use((err, req, res, next) => {
 
 // Start the server
 const port = process.env.PORT || 8080;
-app.listen(port, "0.0.0.0", () => {
-  console.log("Listening on Port " + port);
+app.listen(port, '0.0.0.0', () => {
+  console.log('Listening on Port ' + port);
 });
 
 module.exports = app; // Export the app for testing
