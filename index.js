@@ -222,10 +222,6 @@ app.put(
     const userId = req.params.userId;
     const updatedUserData = req.body;
 
-    if (req.user._id !== userId) {
-      return res.status(403).send("Permission denied");
-    }
-
     if (updatedUserData.Password) {
       updatedUserData.Password = Users.hashPassword(updatedUserData.Password);
     }
