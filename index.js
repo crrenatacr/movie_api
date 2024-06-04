@@ -136,7 +136,7 @@ app.get(
   passport.authenticate("jwt", { session: false }),
   async (req, res, next) => {
     const genre = req.params.genre;
-    await Movies.find({ "Genre.Name": genre })
+    await Movies.aggregate([{ $match: { "Genre.Name": genre } }])
       .then((movies) => {
         if (!movies || movies.length === 0) {
           return res.status(404).send("Movies not found");
