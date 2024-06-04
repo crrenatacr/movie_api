@@ -206,23 +206,23 @@ app.post(
 
 // PUT route for updating user info with validation
 app.put(
-  "/users/:Username",
+  "/users/:userId",
   [
     passport.authenticate("jwt", { session: false }),
     check('Username', 'Username is required').not().isEmpty(),
     check('Username', 'Username contains non-alphanumeric characters - not allowed.').isAlphanumeric(),
     check('Email', 'Email is required').isEmail()
   ],
-  async (req, res, next) => {
+  async (req, res, _) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.array() });
     }
 
-    const username = req.params.Username;
+    const userId = req.params.userId;
     const updatedUserData = req.body;
 
-    if (req.user.Username !== username) {
+    if (req.user._id !== userId) {
       return res.status(403).send("Permission denied");
     }
 
@@ -230,7 +230,7 @@ app.put(
       updatedUserData.Password = Users.hashPassword(updatedUserData.Password);
     }
 
-    await Users.findOneAndUpdate({ Username: username }, updatedUserData, {
+    await Users.findOneAndUpdate({ _id: req.params.userId }, updatedUserData, {
       new: true
     })
       .then((user) => {
