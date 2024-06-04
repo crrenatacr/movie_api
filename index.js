@@ -26,6 +26,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // Authentication
 const passport = require("passport");
+const jwt = require("jsonwebtoken");
 require("./passport");
 
 const cors = require("cors");
@@ -45,6 +46,34 @@ app.use(
     }
   })
 );
+
+// Function to generate JWT token
+const generateJWTToken = (user) => {
+  return jwt.sign(user, process.env.JWT_SECRET, {
+    subject: user.Username, // This is the username you're encoding in the JWT
+    expiresIn: "7d", // This specifies that the token will expire in 7 days
+    algorithm: "HS256" // This is the algorithm used to "sign" or encode the values of the JWT
+  });
+};
+
+// POST route for user login
+app.post("/login", (req, res) => {
+  passport.authenticate("local", { session: false }, (error, user, info) => {
+    if (error || !user) {
+      return res.status(400).json({
+        message: "Something is not right",
+        user: user
+      });
+    }
+    req.login(user, { session: false }, (error) => {
+      if (error) {
+        res.send(error);
+      }
+      const token = generateJWTToken(user.toJSON());
+      return res.json({ user, token });
+    });
+  })(req, res);
+});
 
 // GET route for /
 app.get("/", (req, res) => {
@@ -79,6 +108,40 @@ app.get(
           return res.status(404).send("Movie not found");
         }
         res.json(movie);
+      })
+      .catch(next);
+  }
+);
+
+// GET route for /movies/directors/:director
+app.get(
+  "/movies/directors/:director",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res, next) => {
+    const director = req.params.director;
+    await Movies.find({ "Director.Name": director })
+      .then((movies) => {
+        if (!movies || movies.length === 0) {
+          return res.status(404).send("Movies not found");
+        }
+        res.json(movies);
+      })
+      .catch(next);
+  }
+);
+
+// GET route for /movies/genres/:genre
+app.get(
+  "/movies/genres/:genre",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res, next) => {
+    const genre = req.params.genre;
+    await Movies.find({ "Genre.Name": genre })
+      .then((movies) => {
+        if (!movies || movies.length === 0) {
+          return res.status(404).send("Movies not found");
+        }
+        res.json(movies);
       })
       .catch(next);
   }
