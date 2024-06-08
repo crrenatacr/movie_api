@@ -4,6 +4,14 @@ const Models = require("./models.js");
 const Movies = Models.Movie;
 const Users = Models.User;
 
+// Serves static files from 'public' folder
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Endpoint to serve the file documentation.html directly
+app.get('/documentation', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'documentation.html'));
+});
+
 // Load environment variables from .env file
 require('dotenv').config();
 
