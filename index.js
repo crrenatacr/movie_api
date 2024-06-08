@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const Models = require("./models.js");
 const Movies = Models.Movie;
 const Users = Models.User;
+const app = express();
 
 // Serves static files from 'public' folder
 app.use(express.static(path.join(__dirname, 'public')));
