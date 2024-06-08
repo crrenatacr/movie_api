@@ -24,7 +24,6 @@ mongoose.connect(process.env.CONNECTION_URI, { useNewUrlParser: true, useUnified
 const express = require("express");
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
-const app = express();
 const path = require("path");
 
 // Middleware
@@ -145,7 +144,7 @@ app.get(
   passport.authenticate("jwt", { session: false }),
   async (req, res, next) => {
     const genre = req.params.genre;
-    await Movies.aggregate([{ $match: { "Genre.Name": genre } }])
+    await Movies.aggregate([{ $match: { "Genre.Name": genre } }])
       .then((movies) => {
         if (!movies || movies.length === 0) {
           return res.status(404).send("Movies not found");
