@@ -1,3 +1,7 @@
+const express = require("express");
+const morgan = require("morgan");
+const bodyParser = require("body-parser");
+const path = require("path");
 const { check, validationResult } = require("express-validator");
 const mongoose = require("mongoose");
 const Models = require("./models.js");
@@ -20,11 +24,6 @@ require('dotenv').config();
 mongoose.connect(process.env.CONNECTION_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Database connected successfully'))
   .catch(err => console.error('Database connection error:', err));
-
-const express = require("express");
-const morgan = require("morgan");
-const bodyParser = require("body-parser");
-const path = require("path");
 
 // Middleware
 app.use(express.json());
