@@ -4,6 +4,8 @@ const Models = require("./models.js");
 const Movies = Models.Movie;
 const Users = Models.User;
 const app = express();
+const cors = require("cors");
+app.use(cors());
 
 // Serves static files from 'public' folder
 app.use(express.static(path.join(__dirname, 'public')));
@@ -39,21 +41,6 @@ require("./passport");
 
 const cors = require("cors");
 const allowedOrigins = ["http://localhost:8080", "http://testsite.com"];
-
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.indexOf(origin) === -1) {
-        const message =
-          "The CORS policy for this application doesn’t allow access from origin " +
-          origin;
-        return callback(new Error(message), false);
-      }
-      return callback(null, true);
-    }
-  })
-);
 
 // Function to generate JWT token
 const generateJWTToken = (user) => {
