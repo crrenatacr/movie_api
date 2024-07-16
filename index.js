@@ -40,7 +40,7 @@ const jwt = require("jsonwebtoken");
 require("./passport");
 
 const cors = require("cors");
-const allowedOrigins = ["http://localhost:8080", "http://testsite.com"];
+let allowedOrigins = ['http://localhost:8080', 'http://testsite.com', 'http://localhost:1234', 'https://myflixmovieverse.netlify.app'];
 
 
 app.use(cors({
