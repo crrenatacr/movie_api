@@ -43,7 +43,6 @@ const cors = require("cors");
 const allowedOrigins = ["http://localhost:8080", "http://testsite.com"];
 
 
-
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
