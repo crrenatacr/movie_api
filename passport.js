@@ -10,7 +10,14 @@ const Users = Models.User;
 const JWTStrategy = passportJWT.Strategy,
   ExtractJWT = passportJWT.ExtractJwt;
 
-// Setting up LocalStrategy for username and password authentication
+/**
+ * LocalStrategy configuration for username and password authentication.
+ * @function
+ * @param {string} username - The username provided by the user.
+ * @param {string} password - The password provided by the user.
+ * @param {function} callback - The callback function to return the result.
+ * @returns {void}
+ */
 passport.use(
   new LocalStrategy(
     {
@@ -44,7 +51,13 @@ passport.use(
   )
 );
 
-// Setting up JWTStrategy for token authentication
+/**
+ * JWTStrategy configuration for token authentication.
+ * @function
+ * @param {Object} jwtPayload - The decoded JWT payload.
+ * @param {function} callback - The callback function to return the result.
+ * @returns {void}
+ */
 passport.use(
   new JWTStrategy(
     {
